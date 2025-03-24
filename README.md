@@ -1,6 +1,6 @@
 # My name is Hoang Thien Duy 
 
-# Project Quản lý Sản phẩm (NestJS & Next.js)
+# Hệ thống Quản lý Sản phẩm - Product Management System (NestJS & Next.js)
 
 ## Mô tả dự án
 
