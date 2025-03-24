@@ -1,0 +1,16 @@
+# Backend
+backend/node_modules
+backend/dist
+backend/coverage
+backend/.env
+backend/.vscode
+
+# Frontend
+frontend/.next
+frontend/node_modules
+frontend/out
+frontend/.vscode
+
+# System files
+.DS_Store
+Thumbs.db
