@@ -1,13 +1,15 @@
 // backend/src/product/product.controller.ts
-import { Controller, Get, Post, Body, Param, Put, Delete, ParseIntPipe, ValidationPipe, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, ParseIntPipe, ValidationPipe, Query, UseGuards} from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { BaseResponseDto } from '../common/dtos/base-reponse.dto'; // Corrected import path
 import { Product } from './entities/product.entity';
 import { ProductQueryDto } from './dto/product-query.dto'; // Import ProductQueryDto
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'; // Import JwtAuthGuard
 
 @Controller('products') // Base route path là /products
+@UseGuards(JwtAuthGuard) // **ÁP DỤNG JWT AUTH GUARD CHO TOÀN BỘ CONTROLLER**
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
