@@ -1,10 +1,11 @@
 // backend/src/product/product.controller.ts
-import { Controller, Get, Post, Body, Param, Put, Delete, ParseIntPipe, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, ParseIntPipe, ValidationPipe, Query } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { BaseResponseDto } from '../common/dtos/base-reponse.dto'; // Corrected import path
 import { Product } from './entities/product.entity';
+import { ProductQueryDto } from './dto/product-query.dto'; // Import ProductQueryDto
 
 @Controller('products') // Base route path là /products
 export class ProductController {
@@ -19,11 +20,13 @@ export class ProductController {
     return new BaseResponseDto<Product>(201, 'Tạo sản phẩm thành công', product); // Sử dụng BaseResponseDto
   }
 
-  // 2. Lấy danh sách sản phẩm (GET /products)
+  // 2. Lấy danh sách sản phẩm (GET /products) - Có tìm kiếm, sắp xếp, phân trang
   @Get()
-  async getProducts(): Promise<BaseResponseDto<Product[]>> {
-    const products = await this.productService.findAll();
-    return new BaseResponseDto<Product[]>(200, 'Lấy danh sách sản phẩm thành công', products); // Sử dụng BaseResponseDto
+  async getProducts(
+    @Query(new ValidationPipe()) query: ProductQueryDto, // Sử dụng @Query và ValidationPipe để validate query params
+  ): Promise<BaseResponseDto<{ items: Product[]; total: number }>> {
+    const { items, total } = await this.productService.findAll(query); // Truyền ProductQueryDto vào service
+    return new BaseResponseDto<{ items: Product[]; total: number }>(200, 'Lấy danh sách sản phẩm thành công', { items, total });
   }
 
   // 3. Lấy sản phẩm theo ID (GET /products/:id)
