@@ -15,6 +15,6 @@ export class CreateProductDto {
   price!: number;
 
   @IsString()
-  @IsOptional() // imageUrl là optional khi tạo
+  @IsOptional()
   imageUrl?: string;
 }
