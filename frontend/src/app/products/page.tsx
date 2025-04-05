@@ -1,11 +1,11 @@
 // src/app/products/page.tsx hoặc app/products/page.tsx
-'use client';
+'use client'; // Đánh dấu đây là Client Component vì dùng useState, useEffect
 
 import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
-  Grid, // Import Grid
+  Grid,
   Card,
   CardMedia,
   CardContent,
@@ -15,8 +15,8 @@ import {
   Alert,
   Box,
 } from '@mui/material';
-import { getProducts } from '../../utils/api';
-import { Product } from '../../types/product';
+import { getProducts } from '../../utils/api'; // Import hàm gọi API
+import { Product } from '../../types/product'; // Import kiểu Product (sẽ tạo ở bước sau)
 
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -24,15 +24,17 @@ const ProductsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [totalProducts, setTotalProducts] = useState(0);
 
+  // Hàm để fetch sản phẩm
   const fetchProducts = async () => {
     setLoading(true);
     setError(null);
     try {
-      // TODO: Add authentication logic if needed
-      const data = await getProducts();
+      // **LƯU Ý:** Hiện tại chưa có login, nên sẽ gọi API public (nếu có) hoặc bị lỗi 401 nếu API private
+      // TODO: Thêm logic kiểm tra login và lấy token trước khi gọi API private
+      const data = await getProducts(); // Gọi API lấy sản phẩm
       if (data && data.items) {
         setProducts(data.items);
-        setTotalProducts(data.total || data.items.length);
+        setTotalProducts(data.total || data.items.length); // Lấy tổng số sản phẩm
       } else {
          setProducts([]);
          setTotalProducts(0);
@@ -45,10 +47,12 @@ const ProductsPage = () => {
     }
   };
 
+  // Gọi hàm fetchProducts khi component mount lần đầu
   useEffect(() => {
     fetchProducts();
   }, []);
 
+  // Xử lý hiển thị trạng thái loading
   if (loading) {
     return (
       <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
@@ -57,19 +61,24 @@ const ProductsPage = () => {
     );
   }
 
+  // Xử lý hiển thị lỗi
   if (error) {
     return (
       <Container>
          <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>
+         {/* Có thể thêm nút thử lại */}
          <Button variant="contained" onClick={fetchProducts} sx={{ mt: 1 }}>Thử lại</Button>
       </Container>
     );
   }
 
+  // Hàm lấy URL đầy đủ của ảnh
   const getImageUrl = (relativePath?: string): string => {
       if (!relativePath) {
-          return '/placeholder-image.png';
+          // Trả về ảnh placeholder hoặc không hiển thị ảnh
+          return '/placeholder-image.png'; // Ví dụ: đặt placeholder trong public/
       }
+      // Đảm bảo không có dấu / thừa
       const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '');
       const imagePath = relativePath.replace(/^\//, '');
       return `${backendUrl}/${imagePath}`;
@@ -81,18 +90,26 @@ const ProductsPage = () => {
         Danh sách Sản phẩm ({totalProducts})
       </Typography>
 
-      <Grid container spacing={3}> {/* Grid container */}
+      {/* TODO: Thêm nút Tạo Sản Phẩm Mới */}
+      {/* <Button variant="contained" color="primary" sx={{ mb: 2 }}>
+         Tạo sản phẩm mới
+      </Button> */}
+
+      {/* TODO: Thêm các bộ lọc, sắp xếp, phân trang */}
+
+      <Grid container spacing={3}>
         {products.length > 0 ? (
           products.map((product) => (
-            // --- SỬA Ở ĐÂY: Bỏ prop 'item' ---
-            <Grid component="div" key={product.id} xs={12} sm={6} md={4} lg={3}> {/* Grid item: đặt xs, sm, md, lg trực tiếp */}
+            <Grid item={true} key={product.id} xs={12} sm={6} md={4} lg={3}>
               <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <CardMedia
                   component="img"
                   sx={{
-                      aspectRatio: '1 / 1',
-                      objectFit: 'contain',
-                      p: 1
+                      // Chiều cao cố định hoặc tỷ lệ aspect-ratio
+                      // height: 140,
+                      aspectRatio: '1 / 1', // Tỷ lệ 1:1
+                      objectFit: 'contain', // Chứa vừa ảnh, không cắt xén
+                      p: 1 // Thêm padding nếu muốn
                   }}
                   image={getImageUrl(product.imageUrl)}
                   alt={product.name}
@@ -105,16 +122,18 @@ const ProductsPage = () => {
                       display: '-webkit-box',
                       overflow: 'hidden',
                       WebkitBoxOrient: 'vertical',
-                      WebkitLineClamp: 3,
+                      WebkitLineClamp: 3, // Giới hạn 3 dòng
                   }}>
                     {product.description}
                   </Typography>
                   <Typography variant="h6" sx={{ mt: 1 }}>
-                    Giá: ${product.price ? product.price.toFixed(2) : 'N/A'} {/* Thêm kiểm tra price tồn tại */}
+                    Giá: ${Number(product.price).toFixed(2)}
                   </Typography>
                 </CardContent>
                 <CardActions>
+                  {/* TODO: Thêm Link đến trang chi tiết */}
                   <Button size="small">Xem</Button>
+                  {/* TODO: Thêm nút Sửa, Xóa (cần kiểm tra quyền) */}
                   <Button size="small">Sửa</Button>
                   <Button size="small" color="error">Xóa</Button>
                 </CardActions>
@@ -122,12 +141,13 @@ const ProductsPage = () => {
             </Grid>
           ))
         ) : (
-          // --- SỬA Ở ĐÂY: Bỏ prop 'item' nếu có ---
-          <Grid xs={12}> {/* Grid cho thông báo rỗng */}
+          <Grid item={true} xs={12}>
              <Typography sx={{ textAlign: 'center', mt: 4 }}>Không có sản phẩm nào.</Typography>
           </Grid>
         )}
       </Grid>
+
+        {/* TODO: Thêm component phân trang */}
     </Container>
   );
 };
