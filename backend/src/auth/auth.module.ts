@@ -5,11 +5,13 @@ import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { AppConfigModule } from '../config/config.module';
 import { AppConfigService } from '../config/config.service';
-import { JwtStrategy } from './strategies/jwt.strategy'; // Import JwtStrategy
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { UserModule } from '../user/user.module'; // Import UserModule
 
 @Module({
   imports: [
     AppConfigModule,
+    UserModule, // **THÊM UserModule VÀO IMPORTS ĐÂY**
     JwtModule.registerAsync({
       imports: [AppConfigModule],
       inject: [AppConfigService],
@@ -20,6 +22,6 @@ import { JwtStrategy } from './strategies/jwt.strategy'; // Import JwtStrategy
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy], // Đăng ký JwtStrategy như một provider
+  providers: [AuthService, JwtStrategy],
 })
 export class AuthModule {}

@@ -15,7 +15,7 @@ export class Product {
   @Column({ type: 'decimal', precision: 10, scale: 2 }) // Kiểu decimal cho giá, precision và scale để định dạng số thập phân
   price!: number;
 
-  @Column({ nullable: true }) // Trường này có thể null (ví dụ: khi sản phẩm chưa có ảnh)
+  @Column({ nullable: true }) // Cho phép null
   imageUrl?: string;
 
   @CreateDateColumn() // Tự động tạo thời điểm tạo bản ghi
