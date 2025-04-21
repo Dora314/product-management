@@ -12,7 +12,7 @@ import { diskStorage } from 'multer'; // Import diskStorage từ multer
 import { extname } from 'path'; // Import extname từ path (Node.js built-in)
 
 @Controller('products') // Base route path là /products
-// @UseGuards(JwtAuthGuard) // **ÁP DỤNG JWT AUTH GUARD CHO TOÀN BỘ CONTROLLER**
+@UseGuards(JwtAuthGuard) // **ÁP DỤNG JWT AUTH GUARD CHO TOÀN BỘ CONTROLLER**
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 

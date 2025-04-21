@@ -1,20 +1,32 @@
-// src/app/layout.tsx hoặc app/layout.tsx
-import * as React from 'react';
-import ThemeRegistry from '../theme/ThemeRegistry'; // Đường dẫn tới ThemeRegistry
+import React from "react";
+// Import other necessary components like ThemeRegistry, global styles, etc.
+import ThemeRegistry from "../theme/ThemeRegistry"; // Uncommented import
+import { AuthProvider } from "@/contexts/AuthContext";
 
-export const metadata = {
-  title: 'Quản lý Sản phẩm',
-  description: 'Ứng dụng quản lý sản phẩm Next.js và NestJS',
-};
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en">
-      <body>
-        <ThemeRegistry> {/* Bọc children bằng ThemeRegistry */}
-          {children}
-        </ThemeRegistry>
-      </body>
+    <html lang="vi">
+      <AuthProvider>
+        <head>
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link
+            rel="preconnect"
+            href="https://fonts.gstatic.com"
+            crossOrigin="anonymous"
+          />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap&subset=vietnamese"
+            rel="stylesheet"
+          />
+        </head>
+        <body>
+          <ThemeRegistry>{children}</ThemeRegistry>
+        </body>
+      </AuthProvider>
     </html>
   );
 }

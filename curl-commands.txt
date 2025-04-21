@@ -1,0 +1,150 @@
+# =============================================================
+# API Test Commands using cURL for Product Management App
+# =============================================================
+#
+# Backend Base URL (Assumed): http://localhost:3000
+#
+# NOTES:
+# 1. Replace placeholders like YOUR_ACCESS_TOKEN_HERE, your_registered_username,
+#    your_password, new_username, new_password, PRODUCT_ID, /path/to/your/image.jpg
+#    with your actual data.
+# 2. For PRIVATE APIs (marked below, mostly Product APIs), you must first run
+#    the Login command to get an access token.
+# 3. You can set the access token as an environment variable (e.g., in bash/zsh:
+#    export ACCESS_TOKEN="YOUR_TOKEN") or paste it directly into the commands.
+# 4. Add '| jq' at the end of commands if you have jq installed and want
+#    formatted JSON output in your terminal.
+# 5. These commands are for standard cURL (Linux, macOS, Git Bash, or properly
+#    installed cURL on Windows). If using Windows PowerShell's built-in 'curl'
+#    alias, you need to use the 'Invoke-WebRequest' syntax instead.
+#
+# ==============================
+# Authentication
+# ==============================
+
+# 1. Login (POST /auth/login) - Public
+#    Purpose: Authenticate a registered user and get an access token.
+#    Action: Replace 'your_registered_username' and 'your_password'.
+echo "# --- Logging in ---"
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{
+        "username": "your_registered_username",
+        "password": "your_password"
+      }' \
+  http://localhost:3000/auth/login
+
+# ==============================
+# Users
+# ==============================
+
+# 1. Register (POST /users/register) - Public
+#    Purpose: Create a new user account.
+#    Action: Replace 'new_username' and 'new_password'.
+echo "# --- Registering New User ---"
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{
+        "username": "new_username",
+        "password": "new_password"
+      }' \
+  http://localhost:3000/users/register
+
+# ==============================
+# Products (Private - Require Auth Token)
+# ==============================
+
+# --- Set Your Access Token Here (Replace with token from Login) ---
+ACCESS_TOKEN="YOUR_ACCESS_TOKEN_HERE"
+# -----------------------------------------------------------------
+
+# 1. Create Product (POST /products)
+#    Purpose: Add a new product.
+#    Action: Replace product details in the JSON body.
+echo "# --- Creating Product ---"
+curl -X POST \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "name": "Awesome Product",
+        "description": "This is a description of the awesome product.",
+        "price": 99.99,
+        "imageUrl": "/uploads/products/some_image.jpg"
+      }' \
+  http://localhost:3000/products
+
+# 2. Get Product List (GET /products) - Basic
+#    Purpose: Retrieve all products (or first page by default).
+echo "# --- Getting Product List (Basic) ---"
+curl -H "Authorization: Bearer $ACCESS_TOKEN" \
+  http://localhost:3000/products
+
+# 3. Get Product List (GET /products) - With Query Parameters
+#    Purpose: Retrieve products with filtering, sorting, and pagination.
+#    Note: Enclose URL in single quotes if your shell interprets '&' specially.
+
+# Example: Search for products containing "Awesome"
+echo "# --- Getting Product List (Search) ---"
+curl -H "Authorization: Bearer $ACCESS_TOKEN" \
+  'http://localhost:3000/products?search=Awesome'
+
+# Example: Sort by price in descending order
+echo "# --- Getting Product List (Sort) ---"
+curl -H "Authorization: Bearer $ACCESS_TOKEN" \
+  'http://localhost:3000/products?sortBy=price&sortOrder=desc'
+
+# Example: Get page 2, with 3 items per page
+echo "# --- Getting Product List (Pagination) ---"
+curl -H "Authorization: Bearer $ACCESS_TOKEN" \
+  'http://localhost:3000/products?page=2&pageSize=3'
+
+# Example: Combined search, sort, and pagination
+echo "# --- Getting Product List (Combined) ---"
+curl -H "Authorization: Bearer $ACCESS_TOKEN" \
+  'http://localhost:3000/products?search=Product&sortBy=createdAt&sortOrder=asc&page=1&pageSize=5'
+
+# 4. Get Product Detail (GET /products/:id)
+#    Purpose: Retrieve details for a specific product.
+#    Action: Replace PRODUCT_ID with the ID of the product you want to view.
+PRODUCT_ID=1 # <-- Change this ID
+echo "# --- Getting Product Detail (ID: $PRODUCT_ID) ---"
+curl -H "Authorization: Bearer $ACCESS_TOKEN" \
+  http://localhost:3000/products/$PRODUCT_ID
+
+# 5. Update Product (PUT /products/:id)
+#    Purpose: Modify an existing product. Send only the fields you want to change.
+#    Action: Replace PRODUCT_ID and update fields in the JSON body.
+PRODUCT_ID=1 # <-- Change this ID
+echo "# --- Updating Product (ID: $PRODUCT_ID) ---"
+curl -X PUT \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "price": 109.99,
+        "description": "Updated description."
+      }' \
+  http://localhost:3000/products/$PRODUCT_ID
+
+# 6. Delete Product (DELETE /products/:id)
+#    Purpose: Remove a product.
+#    Action: Replace PRODUCT_ID.
+PRODUCT_ID=1 # <-- Change this ID
+echo "# --- Deleting Product (ID: $PRODUCT_ID) ---"
+curl -X DELETE \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  http://localhost:3000/products/$PRODUCT_ID
+
+# 7. Upload Product Image (POST /products/upload)
+#    Purpose: Upload an image file for a product. Returns the image URL.
+#    Action: Replace FILE_PATH with the actual path to your image file.
+#    Note: Uses -F for multipart/form-data.
+FILE_PATH="/path/to/your/local/image.jpg" # <-- Change this path
+echo "# --- Uploading Product Image ---"
+curl -X POST \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -F "image=@$FILE_PATH" \
+  http://localhost:3000/products/upload
+
+# =============================================================
+# End of Commands
+# =============================================================

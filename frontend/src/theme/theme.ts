@@ -18,12 +18,7 @@ const theme = createTheme({
   },
   typography: {
     // Tùy chỉnh font chữ, kích thước, v.v. nếu muốn
-    // fontFamily: [
-    //   '-apple-system',
-    //   'BlinkMacSystemFont',
-    //   '"Segoe UI"',
-    //   'Roboto',
-    // ].join(','),
+    fontFamily: 'Roboto',
   },
   // Bạn có thể tùy chỉnh thêm các thuộc tính khác của theme
 });

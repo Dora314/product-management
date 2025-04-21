@@ -1,0 +1,179 @@
+=================================================
+ Hướng dẫn Test API Backend bằng Postman
+ Project: Quản lý Sản phẩm (NestJS)
+=================================================
+
+Mục đích: Hướng dẫn này mô tả cách sử dụng Postman để test các API backend đã xây dựng cho dự án quản lý sản phẩm.
+
+Yêu cầu:
+1.  Cài đặt Postman: Tải và cài đặt từ [https://www.postman.com/downloads/](https://www.postman.com/downloads/)
+2.  Backend Server đang chạy: Đảm bảo backend NestJS của bạn đang chạy (thường ở http://localhost:3000).
+
+-------------------------------------------------
+Bước 1: Thiết lập Postman Environment
+-------------------------------------------------
+
+Sử dụng Environment trong Postman giúp quản lý các biến dùng chung như URL cơ sở và token xác thực.
+
+1.  Mở Postman.
+2.  Click vào biểu tượng con mắt (Environment Quick Look) ở góc trên bên phải, sau đó click "Add" hoặc chọn "Environments" ở thanh bên trái và click dấu "+".
+3.  Đặt tên cho Environment, ví dụ: "Product Management Dev".
+4.  Thêm các biến sau:
+    *   **VARIABLE:** `baseUrl`
+        **INITIAL VALUE:** `http://localhost:3000` (Hoặc URL backend của bạn)
+        **CURRENT VALUE:** `http://localhost:3000`
+    *   **VARIABLE:** `accessToken`
+        **INITIAL VALUE:** (Để trống)
+        **CURRENT VALUE:** (Để trống - Sẽ cập nhật sau khi Login)
+5.  Click "Save".
+6.  **QUAN TRỌNG:** Chọn Environment bạn vừa tạo từ dropdown ở góc trên bên phải để kích hoạt nó.
+
+-------------------------------------------------
+Bước 2: Tạo Postman Collection (Tùy chọn nhưng nên làm)
+-------------------------------------------------
+
+Tạo một Collection để nhóm các request lại cho gọn gàng.
+1.  Click "Collections" ở thanh bên trái.
+2.  Click dấu "+" hoặc "Create Collection".
+3.  Đặt tên cho Collection, ví dụ: "Product Management APIs".
+
+-------------------------------------------------
+Bước 3: Test các API Requests
+-------------------------------------------------
+
+Tạo các request mới trong Postman (lưu vào Collection nếu muốn). Đảm bảo bạn đã chọn đúng Environment đã tạo.
+
+**A. Auth APIs**
+
+1.  **Register User (POST /users/register)**
+    *   **Method:** POST
+    *   **URL:** `{{baseUrl}}/users/register`
+    *   **Tab:** Body
+        *   Chọn `raw`.
+        *   Chọn `JSON` từ dropdown.
+        *   Dán JSON body sau (thay đổi username/password nếu muốn):
+            ```json
+            {
+                "username": "postmanuser",
+                "password": "password123"
+            }
+            ```
+    *   **Click:** Send
+    *   **Kiểm tra Response:** Status `201 Created`, body chứa thông tin user (không có password).
+
+2.  **Login User (POST /auth/login)**
+    *   **Method:** POST
+    *   **URL:** `{{baseUrl}}/auth/login`
+    *   **Tab:** Body
+        *   Chọn `raw`, `JSON`.
+        *   Dán JSON body sau (sử dụng tài khoản đã đăng ký):
+            ```json
+            {
+                "username": "postmanuser",
+                "password": "password123"
+            }
+            ```
+    *   **Click:** Send
+    *   **Kiểm tra Response:** Status `200 OK`, body chứa `accessToken` trong phần `data`.
+    *   **!!! QUAN TRỌNG !!!:** Copy giá trị `accessToken` từ response body.
+    *   Mở lại Environment ("Product Management Dev"), tìm biến `accessToken` và **dán token vừa copy vào cột CURRENT VALUE**. Click "Save". Bây giờ các request khác có thể sử dụng token này.
+
+**B. Product APIs (Yêu cầu Authentication)**
+
+**Lưu ý:** Tất cả các request dưới đây cần được xác thực.
+
+*   **Cách thêm Authentication:**
+    *   Trong mỗi request, chuyển sang tab **Authorization**.
+    *   **Type:** Chọn `Bearer Token`.
+    *   **Token:** Nhập `{{accessToken}}` (Postman sẽ tự động lấy giá trị từ Environment).
+
+1.  **Upload Product Image (POST /products/upload)**
+    *   **Method:** POST
+    *   **URL:** `{{baseUrl}}/products/upload`
+    *   **Tab:** Authorization (Chọn Bearer Token, nhập `{{accessToken}}`)
+    *   **Tab:** Body
+        *   Chọn `form-data`.
+        *   Trong bảng Key-Value:
+            *   **KEY:** `image`
+            *   Click vào ô bên cạnh KEY, chọn `File` từ dropdown.
+            *   **VALUE:** Click "Select Files" và chọn file ảnh từ máy tính của bạn.
+    *   **Tab:** Headers
+        *   **KHÔNG** cần tự thêm header `Content-Type`. Postman sẽ tự động tạo header `Content-Type: multipart/form-data` với boundary phù hợp khi bạn gửi request có file dạng form-data. Nếu có sẵn, hãy bỏ check nó.
+    *   **Click:** Send
+    *   **Kiểm tra Response:** Status `201 Created`, body chứa `imageUrl` trong phần `data`.
+    *   **Ghi lại giá trị `imageUrl`** để sử dụng khi tạo/cập nhật sản phẩm. Ví dụ: `/uploads/products/product-image-xxxx.jpg`
+
+2.  **Create Product (POST /products)**
+    *   **Method:** POST
+    *   **URL:** `{{baseUrl}}/products`
+    *   **Tab:** Authorization (Bearer Token `{{accessToken}}`)
+    *   **Tab:** Headers
+        *   Thêm header: `Content-Type` với value `application/json`.
+    *   **Tab:** Body
+        *   Chọn `raw`, `JSON`.
+        *   Dán JSON body sau (thay `imageUrl` bằng giá trị bạn ghi lại ở bước upload):
+            ```json
+            {
+                "name": "Sản phẩm từ Postman",
+                "description": "Mô tả sản phẩm được tạo bằng Postman",
+                "price": 199.99,
+                "imageUrl": "/uploads/products/product-image-xxxx.jpg" # THAY THẾ ĐÚNG imageUrl
+            }
+            ```
+    *   **Click:** Send
+    *   **Kiểm tra Response:** Status `201 Created`, body chứa thông tin sản phẩm mới tạo (bao gồm cả `id`).
+    *   **Ghi lại `id` của sản phẩm mới tạo** để sử dụng cho các request Get/Update/Delete.
+
+3.  **Get All Products (GET /products)**
+    *   **Method:** GET
+    *   **URL:** `{{baseUrl}}/products`
+    *   **Tab:** Authorization (Bearer Token `{{accessToken}}`)
+    *   **Tab:** Params (Để test tìm kiếm, sắp xếp, phân trang)
+        *   Thêm các cặp Key-Value vào đây, ví dụ:
+            *   `search` : `Postman`
+            *   `sortBy` : `price`
+            *   `sortOrder`: `desc`
+            *   `page`   : `1`
+            *   `pageSize`: `5`
+        *   (Bạn có thể bật/tắt các params này để test các trường hợp khác nhau).
+    *   **Click:** Send
+    *   **Kiểm tra Response:** Status `200 OK`, body chứa `items` (mảng sản phẩm) và `total` trong phần `data`.
+
+4.  **Get Product by ID (GET /products/:id)**
+    *   **Method:** GET
+    *   **URL:** `{{baseUrl}}/products/<REPLACE_WITH_PRODUCT_ID>` (Thay `<REPLACE_WITH_PRODUCT_ID>` bằng `id` bạn ghi lại khi tạo sản phẩm).
+    *   **Tab:** Authorization (Bearer Token `{{accessToken}}`)
+    *   **Click:** Send
+    *   **Kiểm tra Response:** Status `200 OK`, body chứa thông tin chi tiết của sản phẩm.
+
+5.  **Update Product (PUT /products/:id)**
+    *   **Method:** PUT
+    *   **URL:** `{{baseUrl}}/products/<REPLACE_WITH_PRODUCT_ID>` (Thay `<REPLACE_WITH_PRODUCT_ID>` bằng `id` sản phẩm muốn cập nhật).
+    *   **Tab:** Authorization (Bearer Token `{{accessToken}}`)
+    *   **Tab:** Headers
+        *   `Content-Type`: `application/json`
+    *   **Tab:** Body
+        *   Chọn `raw`, `JSON`.
+        *   Dán JSON body chứa các trường cần cập nhật:
+            ```json
+            {
+                "name": "Sản phẩm Đã Cập Nhật (Postman)",
+                "price": 249.50
+                # Bạn có thể thêm imageUrl mới nếu đã upload ảnh khác
+                # "imageUrl": "/uploads/products/new-image-yyyy.png"
+            }
+            ```
+    *   **Click:** Send
+    *   **Kiểm tra Response:** Status `200 OK`, body chứa thông tin sản phẩm đã được cập nhật.
+
+6.  **Delete Product (DELETE /products/:id)**
+    *   **Method:** DELETE
+    *   **URL:** `{{baseUrl}}/products/<REPLACE_WITH_PRODUCT_ID>` (Thay `<REPLACE_WITH_PRODUCT_ID>` bằng `id` sản phẩm muốn xóa).
+    *   **Tab:** Authorization (Bearer Token `{{accessToken}}`)
+    *   **Click:** Send
+    *   **Kiểm tra Response:** Status `200 OK` (hoặc có thể là 204 No Content tùy backend), body thường chứa thông báo thành công đơn giản hoặc rỗng.
+    *   **Kiểm tra lại:** Thử gọi lại API `GET /products/:id` với ID vừa xóa, bạn sẽ nhận được lỗi 404 Not Found.
+
+-------------------------------------------------
+Chúc bạn test thành công!
+-------------------------------------------------
