@@ -140,7 +140,7 @@ const EditProductPage = () => {
 
             <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
                 <Grid container spacing={2}>
-                    <Grid item xs={12}>
+                    <Grid size={12}>
                         <TextField
                             margin="normal"
                             required
@@ -153,7 +153,7 @@ const EditProductPage = () => {
                             autoFocus
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={12}>
                         <TextField
                             margin="normal"
                             required
@@ -167,7 +167,7 @@ const EditProductPage = () => {
                             onChange={handleChange}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid  size={{ xs: 12, sm: 6 }}>
                         <TextField
                             margin="normal"
                             required
@@ -185,7 +185,7 @@ const EditProductPage = () => {
                             onChange={handleChange}
                         />
                     </Grid>
-                     <Grid item xs={12} sm={6}>
+                     <Grid  size={{ xs: 12, sm: 6 }}>
                          <TextField
                              margin="normal"
                              fullWidth

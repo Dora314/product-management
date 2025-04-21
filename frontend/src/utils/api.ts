@@ -14,14 +14,14 @@ const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
   // Add Content-Type for relevant methods (POST, PUT, PATCH)
   // GET/DELETE typically don't need Content-Type: application/json unless specifically required by backend
   if (['POST', 'PUT', 'PATCH'].includes(options.method?.toUpperCase() ?? '')) {
-    headers['Content-Type'] = 'application/json';
+    (headers as Record<string, string>)['Content-Type'] = 'application/json';
   }
 
   // Add Authorization header if token exists (client-side only)
   if (typeof window !== "undefined") {
     const token = localStorage.getItem('accessToken');
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
       // console.log("Sending token:", token); // Optional: debug log
     } else {
       console.log("No token found in localStorage for API request."); // Optional: debug log

@@ -85,17 +85,31 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     }
   };
 
-  // Hàm lấy URL đầy đủ của ảnh (tương tự như trong trang products)
+  // Hàm lấy URL đầy đủ của ảnh (sửa đổi để xử lý data: URI)
   const getFullImageUrl = (relativePath?: string | null): string | null => {
       if (!relativePath) {
           return null;
       }
+
+      // *** Nếu là data URI, trả về trực tiếp ***
+      if (relativePath.startsWith('data:image')) {
+          return relativePath;
+      }
+
+      // Nếu không phải data URI, xây dựng URL đầy đủ từ backend
       const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '');
-      const imagePath = relativePath.replace(/^\//, '');
+      // Đảm bảo đường dẫn bắt đầu bằng 'uploads/' nếu cần
+      let imagePath = relativePath.replace(/^\//, '');
+      if (!imagePath.startsWith('uploads/')) {
+          imagePath = `uploads/${imagePath}`;
+      }
       return `${backendUrl}/${imagePath}`;
   }
 
-  const finalPreviewUrl = getFullImageUrl(previewUrl); // Lấy URL đầy đủ để hiển thị
+  // *** Sử dụng previewUrl trực tiếp nếu là data URI, hoặc gọi getFullImageUrl nếu là path ***
+  const finalPreviewUrl = previewUrl?.startsWith('data:image') 
+                            ? previewUrl 
+                            : getFullImageUrl(previewUrl);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, border: '1px dashed grey', p: 2, borderRadius: 1 }}>

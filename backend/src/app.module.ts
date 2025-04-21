@@ -18,8 +18,8 @@ import { join } from 'path';
     AuthModule,
     UserModule, // Thêm AuthModule vào imports
     ServeStaticModule.forRoot({ // Cấu hình serve static files
-      rootPath: join(__dirname, '..', '..', 'uploads'), // Đường dẫn đến thư mục gốc 'uploads'
-      serveRoot: '/uploads/', // Prefix URL để truy cập (ví dụ: /uploads/products/...)
+      rootPath: join(process.cwd(), 'uploads'), // serve from project-level uploads directory
+      serveRoot: '/uploads', // URL prefix for static files
       // serveStaticOptions: { // Tùy chọn thêm nếu cần
       //   index: false, // Không serve file index.html
       // },
@@ -28,4 +28,4 @@ import { join } from 'path';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

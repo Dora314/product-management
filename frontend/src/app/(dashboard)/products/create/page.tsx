@@ -120,7 +120,7 @@ const CreateProductPage = () => {
 
       <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
         <Grid container spacing={2}>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <TextField
               margin="normal"
               required
@@ -133,7 +133,7 @@ const CreateProductPage = () => {
               autoFocus // Tự động focus vào trường này
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <TextField
               margin="normal"
               required
@@ -147,7 +147,7 @@ const CreateProductPage = () => {
               onChange={handleChange}
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
               margin="normal"
               required
@@ -176,7 +176,7 @@ const CreateProductPage = () => {
               }
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <ImageUpload
               label="Ảnh sản phẩm"
               initialImageUrl={formData.imageUrl} // Truyền imageUrl từ state product

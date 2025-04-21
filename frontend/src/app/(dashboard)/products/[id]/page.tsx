@@ -118,7 +118,7 @@ const ProductDetailPage = () => {
             </Button>
             <Card>
                 <Grid container spacing={2}>
-                     <Grid item xs={12} md={6}>
+                     <Grid  size={{ xs: 12, md: 6 }}>
                         <CardMedia
                             component="img"
                             sx={{
@@ -131,7 +131,7 @@ const ProductDetailPage = () => {
                             alt={product.name}
                         />
                     </Grid>
-                     <Grid item xs={12} md={6}>
+                     <Grid  size={{ xs: 12, md: 6 }}>
                         <CardContent>
                             <Typography variant="h4" component="h1" gutterBottom>
                                 {product.name}

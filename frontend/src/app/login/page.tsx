@@ -140,7 +140,7 @@ export default function LoginPage() {
                 Quên mật khẩu?
               </Link>
             </Grid> */}
-            <Grid item>
+            <Grid>
               <Link href="/register" variant="body2">
                 {" "}
                 {/* TODO: Tạo trang Register */}

@@ -194,7 +194,7 @@ export default function RegisterPage() {
             {loading ? <CircularProgress size={24} /> : "Đăng ký"}
           </Button>
           <Grid container justifyContent="flex-end">
-            <Grid item>
+            <Grid>
               <Link href="/login" variant="body2">
                 {"Đã có tài khoản? Đăng nhập"}
               </Link>
