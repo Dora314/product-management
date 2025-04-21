@@ -1,0 +1,203 @@
+# ================================================================
+# Invoke-WebRequest Commands for Testing Product Management API
+# ================================================================
+#
+# Hướng dẫn:
+# 1. Đảm bảo backend NestJS API đang chạy (thường là ở http://localhost:3000).
+# 2. Mở PowerShell trên Windows.
+# 3. Copy và dán từng khối lệnh vào PowerShell để thực thi.
+# 4. Thay thế các giá trị placeholder như YOUR_USERNAME, YOUR_PASSWORD, YOUR_ACCESS_TOKEN, YOUR_PRODUCT_ID, /path/to/your/image.jpg, YOUR_IMAGE_URL bằng giá trị thực tế.
+# 5. Quan sát output trong PowerShell và kiểm tra kết quả (status code, response body).
+#
+# Lưu ý: Các lệnh có ConvertFrom-Json | ConvertTo-Json dùng để format output JSON cho dễ đọc.
+#        Nếu bạn dùng phiên bản PowerShell cũ không có -Indent, hãy bỏ phần "| ConvertTo-Json" hoặc bỏ "-Indent 4".
+#
+
+# ----------------------------------------
+# API Sản phẩm (Product CRUD)
+# ----------------------------------------
+
+# 1. Tạo sản phẩm mới (POST /products)
+#    Yêu cầu: Cần Access Token nếu API đã được bảo vệ.
+#    Kiểm tra: Status 201 Created, response chứa thông tin sản phẩm mới.
+#    ## THAY THẾ YOUR_ACCESS_TOKEN ##
+$accessToken = "YOUR_ACCESS_TOKEN"
+$jsonBody = @'
+{
+    "name": "Sản phẩm Test PowerShell",
+    "description": "Mô tả sản phẩm tạo từ PowerShell",
+    "price": 19.99
+}
+'@
+Invoke-WebRequest -Uri "http://localhost:3000/products" -Method Post -Headers @{"Authorization"="Bearer $accessToken"; "Content-Type"="application/json"} -Body $jsonBody #| ConvertFrom-Json | ConvertTo-Json -Indent 4
+
+# 2. Lấy danh sách tất cả sản phẩm (GET /products)
+#    Yêu cầu: Cần Access Token nếu API đã được bảo vệ.
+#    Kiểm tra: Status 200 OK, response chứa mảng sản phẩm và 'total'.
+#    ## THAY THẾ YOUR_ACCESS_TOKEN ##
+$accessToken = "YOUR_ACCESS_TOKEN"
+(Invoke-WebRequest -Uri "http://localhost:3000/products" -Method Get -Headers @{"Authorization"="Bearer $accessToken"}).Content #| ConvertFrom-Json | ConvertTo-Json -Indent 4
+
+# 3. Lấy chi tiết một sản phẩm theo ID (GET /products/:id)
+#    Yêu cầu: Cần Access Token nếu API đã được bảo vệ.
+#    Kiểm tra: Status 200 OK và thông tin sản phẩm, hoặc 404 Not Found.
+#    ## THAY THẾ YOUR_ACCESS_TOKEN và YOUR_PRODUCT_ID ##
+$accessToken = "YOUR_ACCESS_TOKEN"
+$productId = 1 # Thay bằng ID sản phẩm bạn muốn xem
+(Invoke-WebRequest -Uri "http://localhost:3000/products/$productId" -Method Get -Headers @{"Authorization"="Bearer $accessToken"}).Content #| ConvertFrom-Json | ConvertTo-Json -Indent 4
+
+# 4. Cập nhật một sản phẩm theo ID (PUT /products/:id)
+#    Yêu cầu: Cần Access Token nếu API đã được bảo vệ.
+#    Kiểm tra: Status 200 OK và thông tin sản phẩm đã cập nhật, hoặc 404 Not Found.
+#    ## THAY THẾ YOUR_ACCESS_TOKEN và YOUR_PRODUCT_ID ##
+$accessToken = "YOUR_ACCESS_TOKEN"
+$productId = 1 # Thay bằng ID sản phẩm bạn muốn cập nhật
+$jsonBody = @'
+{
+    "name": "Sản phẩm ĐÃ CẬP NHẬT PowerShell",
+    "price": 25.50
+}
+'@
+Invoke-WebRequest -Uri "http://localhost:3000/products/$productId" -Method Put -Headers @{"Authorization"="Bearer $accessToken"; "Content-Type"="application/json"} -Body $jsonBody #| ConvertFrom-Json | ConvertTo-Json -Indent 4
+
+# 5. Xóa một sản phẩm theo ID (DELETE /products/:id)
+#    Yêu cầu: Cần Access Token nếu API đã được bảo vệ.
+#    Kiểm tra: Status 200 OK (hoặc 204 No Content tùy implementation). Sau đó thử GET lại sản phẩm đó để chắc chắn đã xóa.
+#    ## THAY THẾ YOUR_ACCESS_TOKEN và YOUR_PRODUCT_ID ##
+$accessToken = "YOUR_ACCESS_TOKEN"
+$productId = 1 # Thay bằng ID sản phẩm bạn muốn xóa
+Invoke-WebRequest -Uri "http://localhost:3000/products/$productId" -Method Delete -Headers @{"Authorization"="Bearer $accessToken"}
+
+# ----------------------------------------
+# API Sản phẩm (Tìm kiếm, Sắp xếp, Phân trang)
+# ----------------------------------------
+
+# 6. Lấy sản phẩm với tìm kiếm (GET /products?search=...)
+#    ## THAY THẾ YOUR_ACCESS_TOKEN ##
+$accessToken = "YOUR_ACCESS_TOKEN"
+$searchTerm = "Test" # Từ khóa tìm kiếm
+(Invoke-WebRequest -Uri "http://localhost:3000/products?search=$searchTerm" -Method Get -Headers @{"Authorization"="Bearer $accessToken"}).Content #| ConvertFrom-Json | ConvertTo-Json -Indent 4
+
+# 7. Lấy sản phẩm với sắp xếp (GET /products?sortBy=...&sortOrder=...)
+#    ## THAY THẾ YOUR_ACCESS_TOKEN ##
+$accessToken = "YOUR_ACCESS_TOKEN"
+(Invoke-WebRequest -Uri "http://localhost:3000/products?sortBy=price&sortOrder=desc" -Method Get -Headers @{"Authorization"="Bearer $accessToken"}).Content #| ConvertFrom-Json | ConvertTo-Json -Indent 4
+
+# 8. Lấy sản phẩm với phân trang (GET /products?page=...&pageSize=...)
+#    ## THAY THẾ YOUR_ACCESS_TOKEN ##
+$accessToken = "YOUR_ACCESS_TOKEN"
+(Invoke-WebRequest -Uri "http://localhost:3000/products?page=1&pageSize=5" -Method Get -Headers @{"Authorization"="Bearer $accessToken"}).Content #| ConvertFrom-Json | ConvertTo-Json -Indent 4
+
+# 9. Lấy sản phẩm kết hợp tìm kiếm, sắp xếp, phân trang
+#    ## THAY THẾ YOUR_ACCESS_TOKEN ##
+$accessToken = "YOUR_ACCESS_TOKEN"
+(Invoke-WebRequest -Uri "http://localhost:3000/products?search=PowerShell&sortBy=name&sortOrder=asc&page=1&pageSize=3" -Method Get -Headers @{"Authorization"="Bearer $accessToken"}).Content #| ConvertFrom-Json | ConvertTo-Json -Indent 4
+
+# ----------------------------------------
+# API Upload Ảnh (POST /products/upload)
+# ----------------------------------------
+# LƯU Ý: Lệnh Invoke-WebRequest cho upload file có thể không ổn định.
+#        Nên sử dụng Postman hoặc curl (nếu cài đúng) để test upload.
+#        Lệnh dưới đây là một ví dụ, có thể gây lỗi "Unexpected end of form".
+#
+#    Yêu cầu: Cần Access Token nếu API đã được bảo vệ.
+#    Kiểm tra: Status 201 Created, response chứa imageUrl. Kiểm tra file ảnh trong thư mục /uploads/products.
+#    ## THAY THẾ /path/to/your/image.jpg và YOUR_ACCESS_TOKEN ##
+# $accessToken = "YOUR_ACCESS_TOKEN"
+# $imagePath = "/path/to/your/image.jpg" # Đường dẫn tới file ảnh trên máy bạn
+# Invoke-WebRequest -Uri "http://localhost:3000/products/upload" -Method Post -Headers @{"Authorization"="Bearer $accessToken"} -InFile $imagePath -ContentType "multipart/form-data"
+
+# ----------------------------------------
+# API Xác thực và Người dùng (Auth & User)
+# ----------------------------------------
+
+# 10. Đăng ký người dùng mới (POST /users/register)
+#     Kiểm tra: Status 201 Created, response chứa thông tin user (không có password).
+#     ## THAY THẾ new_username và new_password ##
+$jsonBody = @'
+{
+    "username": "dora",
+    "password": "dora"
+}
+'@
+Invoke-WebRequest -Uri "http://localhost:3000/users/register" -Method Post -Headers @{"Content-Type"="application/json"} -Body $jsonBody #| ConvertFrom-Json | ConvertTo-Json -Indent 4
+
+# 11. Đăng nhập (POST /auth/login)
+#     Kiểm tra: Status 200 OK, response chứa accessToken.
+#     ## THAY THẾ YOUR_USERNAME và YOUR_PASSWORD ##
+$jsonBody = @'
+{
+    "username": "YOUR_USERNAME",
+    "password": "YOUR_PASSWORD"
+}
+'@
+$loginResponse = Invoke-WebRequest -Uri "http://localhost:3000/auth/login" -Method Post -Headers @{"Content-Type"="application/json"} -Body $jsonBody
+$loginData = $loginResponse.Content | ConvertFrom-Json
+$accessToken = $loginData.data.accessToken # Lưu token vào biến $accessToken
+Write-Host "Login Response Content:"
+$loginResponse.Content #| ConvertTo-Json -Indent 4 # In response
+Write-Host "Access Token Captured: $accessToken" # In token đã lấy được
+
+
+# ----------------------------------------
+# Kiểm tra API được bảo vệ
+# ----------------------------------------
+
+# 12. Truy cập API Product KHÔNG CÓ Token (GET /products)
+#     Kiểm tra: Status 401 Unauthorized.
+Invoke-WebRequest -Uri "http://localhost:3000/products" -Method Get -ErrorAction SilentlyContinue # -ErrorAction để không dừng script nếu lỗi 401
+
+# 13. Truy cập API Product CÓ Token (GET /products)
+#     Yêu cầu: Đã chạy lệnh Login (số 11) để có $accessToken.
+#     Kiểm tra: Status 200 OK, response chứa danh sách sản phẩm.
+#     ## Đảm bảo biến $accessToken đã có giá trị từ lệnh Login ##
+if ($accessToken) {
+    (Invoke-WebRequest -Uri "http://localhost:3000/products" -Method Get -Headers @{"Authorization"="Bearer $accessToken"}).Content #| ConvertFrom-Json | ConvertTo-Json -Indent 4
+} else {
+    Write-Host "Access Token not found. Please run the Login command first." -ForegroundColor Yellow
+}
+
+# ----------------------------------------
+# API Tạo/Cập nhật Product với imageUrl
+# ----------------------------------------
+
+# 14. Tạo sản phẩm mới CÓ imageUrl (POST /products)
+#     Yêu cầu: Đã chạy Login để có $accessToken. Đã upload ảnh và có $imageUrl.
+#     Kiểm tra: Status 201 Created, sản phẩm có imageUrl đúng.
+#     ## Đảm bảo $accessToken và $imageUrl đã có giá trị ##
+$imageUrl = "/uploads/products/your-uploaded-image.jpg" # ## THAY THẾ IMAGE URL ĐÃ UPLOAD ##
+if ($accessToken -and $imageUrl) {
+    $jsonBody = @"
+{
+    "name": "Sản phẩm Test có Ảnh PowerShell",
+    "description": "Mô tả sản phẩm test với ảnh upload",
+    "price": 123.45,
+    "imageUrl": "$($imageUrl)"
+}
+"@
+    Invoke-WebRequest -Uri "http://localhost:3000/products" -Method Post -Headers @{"Authorization"="Bearer $accessToken"; "Content-Type"="application/json"} -Body $jsonBody #| ConvertFrom-Json | ConvertTo-Json -Indent 4
+} else {
+    Write-Host "Access Token or Image URL not found. Please run Login and ensure image was uploaded." -ForegroundColor Yellow
+}
+
+# 15. Cập nhật sản phẩm với imageUrl mới (PUT /products/:id)
+#     Yêu cầu: Đã chạy Login để có $accessToken. Đã upload ảnh và có $newImageUrl. Có $productId.
+#     Kiểm tra: Status 200 OK, sản phẩm có imageUrl được cập nhật.
+#     ## Đảm bảo $accessToken, $productId, $newImageUrl đã có giá trị ##
+$productId = 2 # ## THAY THẾ ID SẢN PHẨM CẦN CẬP NHẬT ##
+$newImageUrl = "/uploads/products/another-uploaded-image.png" # ## THAY THẾ IMAGE URL MỚI ##
+if ($accessToken -and $productId -and $newImageUrl) {
+    $jsonBody = @"
+{
+    "imageUrl": "$($newImageUrl)"
+}
+"@
+    Invoke-WebRequest -Uri "http://localhost:3000/products/$productId" -Method Put -Headers @{"Authorization"="Bearer $accessToken"; "Content-Type"="application/json"} -Body $jsonBody #| ConvertFrom-Json | ConvertTo-Json -Indent 4
+} else {
+    Write-Host "Access Token, Product ID, or New Image URL not found." -ForegroundColor Yellow
+}
+
+
+# ================================================================
+# Kết thúc file lệnh
+# ================================================================
