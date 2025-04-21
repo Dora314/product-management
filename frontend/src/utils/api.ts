@@ -182,3 +182,47 @@ export const logout = () => {
   // Không cần gọi API backend logout trừ khi backend yêu cầu (ví dụ: để vô hiệu hóa token phía server)
   console.log("Frontend logout executed.");
 };
+
+// Interface cho dữ liệu gửi đi khi đăng ký
+interface RegisterDto {
+  username: string;
+  password: string;
+}
+
+// Interface cho dữ liệu người dùng trả về (không có password)
+interface UserResponse {
+  id: number;
+  username: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Hàm gọi API Đăng ký
+export const register = async (userData: RegisterDto): Promise<UserResponse> => {
+  try {
+    // fetchApi đã xử lý JSON.stringify và Content-Type='application/json' cho POST
+    // fetchApi cũng sẽ throw error nếu response.ok là false hoặc backend trả về lỗi logic (qua BaseResponseDto)
+    const registeredUser = await fetchApi("/users/register", { // Endpoint từ tóm tắt backend
+      method: "POST",
+      body: JSON.stringify(userData),
+    });
+
+    // Giả sử fetchApi trả về phần data của BaseResponseDto khi thành công
+    // Kiểm tra xem dữ liệu trả về có hợp lệ không (ít nhất là có id và username)
+    if (registeredUser && registeredUser.id && registeredUser.username) {
+      return registeredUser as UserResponse;
+    } else {
+      // Nếu cấu trúc trả về không đúng như mong đợi
+      console.error("Registration response structure invalid:", registeredUser);
+      throw new Error("Đăng ký thành công nhưng không nhận được thông tin người dùng hợp lệ.");
+    }
+  } catch (error) {
+    console.error("API Register Error:", error);
+    // Ném lại lỗi để component có thể bắt và hiển thị (fetchApi đã xử lý message)
+    if (error instanceof Error) {
+        throw error; // Ném lại lỗi đã có message
+    } else {
+        throw new Error("Đã xảy ra lỗi không xác định trong quá trình đăng ký.");
+    }
+  }
+};

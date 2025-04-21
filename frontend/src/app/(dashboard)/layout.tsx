@@ -26,9 +26,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   // --- Logic Render ---
 
-  // 1. Nếu đang loading, hiển thị spinner
-  if (isLoading) {
-    console.log("Layout Rendering - Loading state");
+  // 1. If loading OR (not loading AND not authenticated), show spinner
+  //    (Spinner is shown while loading or while waiting for redirect)
+  if (isLoading || (!isLoading && !isAuthenticated)) {
+    // Use a different console log message here for clarity
+    console.log("Layout Rendering - Loading authentication state or redirecting...");
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <CircularProgress />
@@ -36,18 +38,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // 2. Nếu không loading VÀ ĐÃ xác thực, render DashboardLayout và children
-  if (!isLoading && isAuthenticated) {
-     console.log("Layout Rendering - Authenticated, rendering dashboard");
-    return (
-      <DashboardLayout>
-        {children}
-      </DashboardLayout>
-    );
-  }
-
-  // 3. Nếu không loading VÀ KHÔNG xác thực, không render gì cả (useEffect sẽ xử lý redirect)
-  // Việc trả về null ở đây ngăn việc render thoáng qua nội dung dashboard trước khi redirect.
-  console.log("Layout Rendering - Not authenticated, waiting for redirect effect");
-  return null;
+  // 2. If not loading AND authenticated, render DashboardLayout
+  // This condition is only met if !isLoading && isAuthenticated
+  console.log("Layout Rendering - Authenticated, rendering dashboard");
+  return (
+    <DashboardLayout>
+      {children}
+    </DashboardLayout>
+  );
 }
